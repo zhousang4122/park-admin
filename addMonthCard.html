@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<!-- ================================================
+     页面：增加月卡页 addMonthCard.html
+     说明：园区后台管理系统 - 三页面之一（新增 / 编辑复用）
+           通过 URL 参数 id 区分模式：无 id = 新增，有 id = 编辑（自动回填）
+           功能：车辆信息 / 缴费信息表单、必填与正则校验、
+                 剩余天数与状态自动计算、重置、保存持久化后跳回列表
+     ================================================ -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增加月卡 - 园区后台管理系统</title>
+    <style>
+        /* ============================================
+           公共样式（三个页面共用同一套布局样式）
+           整体结构：左侧侧边栏 + 右侧主区域（顶栏 + 内容）
+           ============================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            min-width: 900px;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* 大容器：侧边栏 + 主区域左右并排 */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ---------- 左侧侧边栏 ---------- */
+        .sidebar {
+            width: 220px;
+            background: #2f4050;
+            overflow: hidden;
+            transition: width 0.3s;
+        }
+        /* 侧边栏内部再包一层固定宽度，保证收起时文字不换行 */
+        .sidebar-inner { width: 220px; }
+        /* 收起状态：宽度变为 0（配合顶栏折叠按钮） */
+        .sidebar.collapsed { width: 0; }
+
+        /* 顶部标题栏（侧边栏内） */
+        .logo {
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            background: #263445;
+            white-space: nowrap;
+        }
+
+        /* 一级菜单项 */
+        .menu-item {
+            display: block;
+            height: 46px;
+            line-height: 46px;
+            padding: 0 20px;
+            color: #a7b1c2;
+            cursor: pointer;
+            white-space: nowrap;
+            position: relative;
+        }
+        .menu-item:hover { background: #263445; color: #fff; }
+        /* 选中高亮：给当前页面对应的菜单项加 active 类 */
+        .menu-item.active { background: #409eff; color: #fff; }
+
+        /* 有子菜单的父级右侧箭头（用 CSS 画小三角） */
+        .menu-item .arrow {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            margin-top: -2px;
+            width: 0;
+            height: 0;
+            border: 5px solid transparent;
+            border-top-color: #a7b1c2;
+            transition: transform 0.3s;
+        }
+        /* 父级展开时箭头旋转 180 度 */
+        li.open > .menu-item .arrow { transform: rotate(180deg); }
+
+        /* 子菜单：默认隐藏，父级加 open 类后显示 */
+        .submenu { display: none; background: #22303d; }
+        li.open > .submenu { display: block; }
+        .submenu a {
+            display: block;
+            height: 40px;
+            line-height: 40px;
+            padding-left: 46px;
+            color: #9aa7b5;
+            white-space: nowrap;
+        }
+        .submenu a:hover { color: #fff; }
+        /* 子菜单选中高亮 */
+        .submenu a.active { color: #409eff; font-weight: bold; }
+
+        /* ---------- 右侧主区域 ---------- */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        /* 顶部头部：左侧折叠按钮 + 系统名称，右侧登录账号 */
+        .topbar {
+            height: 60px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+        .topbar-left { display: flex; align-items: center; }
+        /* 折叠按钮：用三条 CSS 横线画图标 */
+        .toggle-btn {
+            width: 34px;
+            height: 34px;
+            margin-right: 14px;
+            border: 1px solid #dcdfe6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+        .toggle-btn span { display: block; width: 16px; height: 2px; background: #333; }
+        .system-name { font-size: 17px; font-weight: bold; }
+
+        /* 右侧登录账号区域 */
+        .account { display: flex; align-items: center; }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #409eff;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        .user-name { font-size: 14px; }
+
+        /* 内容区 */
+        .content { padding: 20px; }
+        /* 每个页面的标题条 */
+        .page-title {
+            background: #fff;
+            padding: 14px 20px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* ============================================
+           本页面样式：增加月卡表单页
+           ============================================ */
+
+        /* ---------- 返回按钮 ---------- */
+        .btn {
+            height: 34px;
+            padding: 0 16px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+        .btn:hover { border-color: #409eff; color: #409eff; }
+        .btn-primary { background: #409eff; border-color: #409eff; color: #fff; }
+        .btn-primary:hover { background: #66b1ff; color: #fff; }
+
+        /* ---------- 模式提示条（新增 / 编辑） ---------- */
+        .mode-tip {
+            background: #ecf5ff;
+            border: 1px solid #d9ecff;
+            color: #409eff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        /* ---------- 表单卡片（车辆信息 / 缴费信息） ---------- */
+        .form-card {
+            background: #fff;
+            border-radius: 6px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+        .form-card h3 {
+            font-size: 15px;
+            margin-bottom: 16px;
+            padding-left: 8px;
+            border-left: 3px solid #409eff;
+            line-height: 1.2;
+        }
+        /* 表单两列布局 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .field { display: block; }
+        .field label {
+            display: block;
+            font-size: 13px;
+            color: #606266;
+            margin-bottom: 6px;
+        }
+        .field label .red { color: #f56c6c; }
+        .field input {
+            width: 100%;
+            height: 36px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+            color: #333;
+        }
+        .field input:focus { border-color: #409eff; }
+        /* 只读预览框（剩余天数 / 状态自动计算） */
+        .field input[readonly] { background: #f5f7fa; color: #909399; cursor: not-allowed; }
+        /* 字段下方红色错误提示文字 */
+        .err {
+            display: block;
+            min-height: 18px;
+            margin-top: 4px;
+            color: #f56c6c;
+            font-size: 12px;
+        }
+        /* 只读框下方的灰色小提示 */
+        .hint {
+            display: block;
+            color: #909399;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* ---------- 底部按钮行 ---------- */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 6px 0 30px;
+        }
+        .form-actions .btn { height: 38px; padding: 0 28px; font-size: 15px; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- ============ 左侧侧边导航栏 ============ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-inner">
+                <div class="logo">园区后台管理系统</div>
+                <ul class="menu">
+                    <!-- 工作台 -->
+                    <li>
+                        <a class="menu-item" href="index.html">工作台</a>
+                    </li>
+                    <!-- 月卡管理：本页在子菜单中，父级默认展开并高亮 -->
+                    <li class="open">
+                        <div class="menu-item menu-parent">月卡管理 <i class="arrow"></i></div>
+                        <ul class="submenu">
+                            <li><a href="monthCard.html">月卡列表</a></li>
+                            <li><a class="active" href="addMonthCard.html">增加月卡</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- ============ 右侧主区域 ============ -->
+        <div class="main">
+            <!-- 顶部头部：折叠按钮 + 系统名称 | 登录账号 -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="toggle-btn" id="toggleBtn" title="折叠/展开菜单">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div class="system-name">园区后台管理系统</div>
+                </div>
+                <div class="account">
+                    <div class="avatar">管</div>
+                    <span class="user-name">admin（超级管理员）</span>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="content">
+                <!-- 标题条：返回按钮 + 页面标题（标题由 JS 按新增/编辑模式切换） -->
+                <div class="page-title">
+                    <button class="btn" id="btnBack">&lt; 返回月卡列表</button>
+                    <span id="pageTitleText">增加月卡</span>
+                </div>
+
+                <!-- 新增 / 编辑模式提示（由 JS 根据 URL 参数 id 显示） -->
+                <div class="mode-tip" id="modeTip"></div>
+
+                <!-- 车辆信息表单卡片 -->
+                <div class="form-card">
+                    <h3>车辆信息</h3>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>车牌号<span class="red">*</span></label>
+                            <input type="text" id="fPlate" placeholder="如：赣A12345">
+                            <span class="err" id="errPlate"></span>
+                        </div>
+                        <div class="field">
+                            <label>车主姓名<span class="red">*</span></label>
+                            <input type="text" id="fOwner" placeholder="请输入车主姓名">
+                            <span class="err" id="errOwner"></span>
+                        </div>
+                        <div class="field">
+                            <label>手机号<span class="red">*</span></label>
+                            <input type="text" id="fPhone" placeholder="请输入 11 位手机号">
+                            <span class="err" id="errPhone"></span>
+                        </div>
+                        <div class="field">
+                            <label>备注（选填）</label>
+                            <input type="text" id="fRemark" placeholder="选填备注信息">
+                            <span class="err" id="errRemark"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 缴费信息表单卡片 -->
+                <div class="form-card">
+                    <h3>缴费信息</h3>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>缴费金额(元)<span class="red">*</span></label>
+                            <input type="number" id="fPay" min="0" placeholder="如：3600">
+                            <span class="err" id="errPay"></span>
+                        </div>
+                        <div class="field">
+                            <label>开始日期<span class="red">*</span></label>
+                            <input type="date" id="fStart">
+                            <span class="err" id="errStart"></span>
+                        </div>
+                        <div class="field">
+                            <label>结束日期<span class="red">*</span></label>
+                            <input type="date" id="fEnd">
+                            <span class="err" id="errEnd"></span>
+                        </div>
+                        <div class="field">
+                            <label>剩余有效天数（自动计算）</label>
+                            <input type="text" id="fRemain" readonly placeholder="选择日期后自动计算">
+                            <span class="hint">剩余天数 = 结束日期 - 今天</span>
+                        </div>
+                        <div class="field">
+                            <label>状态（自动判断）</label>
+                            <input type="text" id="fStatus" readonly placeholder="自动判断可用 / 已过期">
+                            <span class="hint">结束日期晚于今天 = 可用，否则 = 已过期</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部按钮：重置 / 确定（保存） -->
+                <div class="form-actions">
+                    <button class="btn" id="btnReset">重置</button>
+                    <button class="btn btn-primary" id="btnSave">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================
+           数据源定义（与 index.html / monthCard.html 一致）
+           ============================================ */
+        var STORAGE_KEY = 'monthCardData'; // localStorage 存储 key（勿改，多页面共用）
+
+        /* 默认模拟月卡数据：localStorage 中没有数据时首次加载使用 */
+        function getDefaultCards() {
+            return [
+                { id: 1001, plate: '赣A12345', ownerName: '张伟', phone: '13800000001', payAmount: 3600, startDate: '2026-01-01', endDate: '2026-12-31' },
+                { id: 1002, plate: '京B88888', ownerName: '李娜', phone: '13900000002', payAmount: 3600, startDate: '2026-01-15', endDate: '2027-01-14' },
+                { id: 1003, plate: '粤C66666', ownerName: '王强', phone: '13700000003', payAmount: 1800, startDate: '2026-03-01', endDate: '2026-08-31' },
+                { id: 1004, plate: '浙D77777', ownerName: '赵敏', phone: '13600000004', payAmount: 1200, startDate: '2025-11-01', endDate: '2026-09-01' },
+                { id: 1005, plate: '苏E55555', ownerName: '陈杰', phone: '13500000005', payAmount: 2400, startDate: '2026-06-01', endDate: '2027-05-31' },
+                { id: 1006, plate: '沪A99999', ownerName: '刘芳', phone: '13400000006', payAmount: 3600, startDate: '2026-07-01', endDate: '2027-06-30' }
+            ];
+        }
+
+        /* ============================================
+           localStorage 读写函数
+           ============================================ */
+
+        // 读取月卡数据：localStorage 有数据则读取，没有则写入默认模拟数据
+        function readMonthCardData() {
+            var data = localStorage.getItem(STORAGE_KEY);
+            var list;
+            if (data === null) {
+                list = getDefaultCards(); // 本地没有数据：使用默认模拟数据
+            } else {
+                list = JSON.parse(data);  // 本地有数据：还原成数组
+            }
+            // 每次读取时按当前日期刷新剩余天数与状态
+            for (var i = 0; i < list.length; i++) {
+                updateCardState(list[i]);
+            }
+            saveMonthCardData(list); // 刷新后存回
+            return list;
+        }
+
+        // 保存月卡数据
+        function saveMonthCardData(list) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        }
+
+        /* ============================================
+           工具函数
+           ============================================ */
+
+        // 补零
+        function padZero(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        // 今天的日期字符串：2026-09-07
+        function getToday() {
+            var d = new Date();
+            return d.getFullYear() + '-' + padZero(d.getMonth() + 1) + '-' + padZero(d.getDate());
+        }
+
+        // 两个日期字符串相差的天数（dateStr2 - dateStr1）
+        function daysBetween(dateStr1, dateStr2) {
+            var a = dateStr1.split('-');
+            var b = dateStr2.split('-');
+            var t1 = Date.UTC(Number(a[0]), Number(a[1]) - 1, Number(a[2]));
+            var t2 = Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2]));
+            return Math.round((t2 - t1) / (24 * 60 * 60 * 1000));
+        }
+
+        // 刷新单张月卡：剩余天数 remainDay / 状态 status（0 可用，1 已过期）
+        function updateCardState(card) {
+            var today = getToday();
+            card.remainDay = daysBetween(today, card.endDate);
+            if (card.remainDay < 0) {
+                card.remainDay = 0;
+            }
+            card.status = (card.endDate < today) ? 1 : 0;
+        }
+
+        // 国内车牌正则（如：赣A12345）：1 位省份汉字 + 1 位字母 + 5 位字母数字
+        var PLATE_REG = /^[\u4e00-\u9fa5][A-Z][A-Z0-9]{5}$/;
+        // 手机号正则：1 开头 + 3-9 + 9 位数字
+        var PHONE_REG = /^1[3-9]\d{9}$/;
+
+        /* ============================================
+           页面模式：根据 URL 参数 id 判断
+           ============================================ */
+        var pageId = null; // 有 id 时是编辑模式（记录该 id），无 id 时是新增模式
+
+        // 读取地址栏查询参数，没有该参数时返回 null
+        function getUrlParam(name) {
+            var search = new URLSearchParams(window.location.search);
+            return search.get(name);
+        }
+
+        // 根据 id 在全部数据中查找一张月卡
+        function findCardById(list, id) {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].id === id) {
+                    return list[i];
+                }
+            }
+            return null;
+        }
+
+        /* ============================================
+           自动计算显示：剩余有效天数 / 状态
+           规则：remainDay = 结束日期 - 今天（不小于 0）
+                 status = 结束日期晚于今天 ? 可用 : 已过期
+           ============================================ */
+        function refreshPreview() {
+            var endDate = document.getElementById('fEnd').value;
+            var remainInput = document.getElementById('fRemain');
+            var statusInput = document.getElementById('fStatus');
+            if (endDate === '') {
+                remainInput.value = '';
+                statusInput.value = '';
+                return;
+            }
+            var today = getToday();
+            var remain = daysBetween(today, endDate);
+            if (remain < 0) {
+                remain = 0;
+            }
+            remainInput.value = remain + ' 天';
+            statusInput.value = (endDate < today) ? '已过期' : '可用';
+        }
+
+        /* ============================================
+           表单校验：必填项 + 手机号正则 + 车牌正则 +
+           金额为正数 + 结束日期不能早于开始日期
+           校验不通过时在对应字段下方给出红色文字提示
+           ============================================ */
+        function setError(id, msg) {
+            document.getElementById(id).textContent = msg;
+        }
+
+        // 清空全部错误提示
+        function clearErrors() {
+            var errIds = ['errPlate', 'errOwner', 'errPhone', 'errPay', 'errStart', 'errEnd', 'errRemark'];
+            for (var i = 0; i < errIds.length; i++) {
+                document.getElementById(errIds[i]).textContent = '';
+            }
+        }
+
+        // 逐项校验，返回 true 表示通过
+        function validateForm() {
+            clearErrors();
+            var ok = true;
+
+            var plate = document.getElementById('fPlate').value.trim();
+            var owner = document.getElementById('fOwner').value.trim();
+            var phone = document.getElementById('fPhone').value.trim();
+            var pay = document.getElementById('fPay').value;
+            var startDate = document.getElementById('fStart').value;
+            var endDate = document.getElementById('fEnd').value;
+
+            // 车牌号：必填 + 国内车牌正则
+            if (plate === '') {
+                setError('errPlate', '车牌号不能为空');
+                ok = false;
+            } else if (!PLATE_REG.test(plate)) {
+                setError('errPlate', '车牌号格式不正确（如：赣A12345）');
+                ok = false;
+            }
+            // 车主姓名：必填
+            if (owner === '') {
+                setError('errOwner', '车主姓名不能为空');
+                ok = false;
+            }
+            // 手机号：必填 + 正则
+            if (phone === '') {
+                setError('errPhone', '手机号不能为空');
+                ok = false;
+            } else if (!PHONE_REG.test(phone)) {
+                setError('errPhone', '手机号格式不正确（应为 1 开头的 11 位数字）');
+                ok = false;
+            }
+            // 缴费金额：必填 + 必须为正数
+            if (pay === '') {
+                setError('errPay', '缴费金额不能为空');
+                ok = false;
+            } else if (Number(pay) <= 0) {
+                setError('errPay', '缴费金额必须大于 0');
+                ok = false;
+            }
+            // 日期：必填 + 结束日期不能早于开始日期
+            if (startDate === '') {
+                setError('errStart', '请选择开始日期');
+                ok = false;
+            }
+            if (endDate === '') {
+                setError('errEnd', '请选择结束日期');
+                ok = false;
+            } else if (startDate !== '' && endDate < startDate) {
+                setError('errEnd', '结束日期不能早于开始日期');
+                ok = false;
+            }
+            return ok;
+        }
+
+        /* ============================================
+           重置：清空表单全部输入框 + 清空错误提示
+           ============================================ */
+        function doReset() {
+            document.getElementById('fPlate').value = '';
+            document.getElementById('fOwner').value = '';
+            document.getElementById('fPhone').value = '';
+            document.getElementById('fRemark').value = '';
+            document.getElementById('fPay').value = '';
+            document.getElementById('fStart').value = '';
+            document.getElementById('fEnd').value = '';
+            document.getElementById('fRemain').value = '';
+            document.getElementById('fStatus').value = '';
+            clearErrors(); // 同时清除页面上的校验错误提示
+        }
+
+        /* ============================================
+           确定（保存）：组装对象 -> 新增 push / 编辑替换
+           -> 写入 localStorage -> 跳回月卡管理页面
+           ============================================ */
+        function doSave() {
+            // 1. 先校验，校验不通过直接返回，阻止提交
+            if (!validateForm()) {
+                return;
+            }
+
+            // 2. 读取表单所有输入框的值
+            var plate = document.getElementById('fPlate').value.trim();
+            var owner = document.getElementById('fOwner').value.trim();
+            var phone = document.getElementById('fPhone').value.trim();
+            var pay = Number(document.getElementById('fPay').value);
+            var startDate = document.getElementById('fStart').value;
+            var endDate = document.getElementById('fEnd').value;
+            var remark = document.getElementById('fRemark').value.trim();
+
+            // 3. 组装完整月卡对象（先不写死 remainDay/status，交给下面的函数计算）
+            var card = {
+                id: pageId,                 // 新增模式下面会被 Date.now() 替换
+                plate: plate,
+                ownerName: owner,
+                phone: phone,
+                payAmount: pay,
+                startDate: startDate,
+                endDate: endDate,
+                remark: remark
+            };
+            // 4. 按结束日期自动计算剩余天数与状态（写入 remainDay / status）
+            updateCardState(card);
+
+            // 5. 读取本地数据源，新增用 push，编辑用替换
+            var list = readMonthCardData();
+            if (pageId === null) {
+                // ---- 新增模式：用 Date.now() 生成唯一 id 后追加到数组末尾 ----
+                card.id = Date.now();
+                list.push(card);
+            } else {
+                // ---- 编辑模式：根据 id 找到对应下标，替换成新对象 ----
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].id === pageId) {
+                        list[i] = card;
+                        break;
+                    }
+                }
+            }
+
+            // 6. 保存到 localStorage（刷新后数据不丢失）
+            saveMonthCardData(list);
+
+            // 7. 保存成功提示并跳转回月卡管理页面
+            alert('保存成功！');
+            location.href = 'monthCard.html';
+        }
+
+        /* ============================================
+           页面初始化：判断模式 -> 新增模式清空 / 编辑模式回填
+           ============================================ */
+        function initPage() {
+            var modeTip = document.getElementById('modeTip');
+            var idParam = getUrlParam('id');
+
+            if (idParam === null) {
+                // ---- 新增模式：页面标题与提示条显示“新增” ----
+                pageId = null;
+                document.getElementById('pageTitleText').textContent = '增加月卡';
+                modeTip.textContent = '新增模式：请填写车辆与缴费信息，点击「确定」保存';
+            } else {
+                // ---- 编辑模式：根据 id 查询对应月卡数据并回填表单 ----
+                pageId = Number(idParam);
+                document.getElementById('pageTitleText').textContent = '编辑月卡';
+                var list = readMonthCardData();
+                var card = findCardById(list, pageId);
+                if (card === null) {
+                    // 数据不存在（可能已被删除）：提示并返回列表
+                    alert('未找到编号为 ' + idParam + ' 的月卡数据，可能已被删除');
+                    location.href = 'monthCard.html';
+                    return;
+                }
+                modeTip.textContent = '编辑模式：正在修改编号 ' + card.id + ' 的月卡信息';
+                // 表单回填
+                document.getElementById('fPlate').value = card.plate;
+                document.getElementById('fOwner').value = card.ownerName;
+                document.getElementById('fPhone').value = card.phone;
+                document.getElementById('fRemark').value = card.remark || '';
+                document.getElementById('fPay').value = card.payAmount;
+                document.getElementById('fStart').value = card.startDate;
+                document.getElementById('fEnd').value = card.endDate;
+                refreshPreview(); // 回填后刷新剩余天数与状态预览
+            }
+        }
+
+        /* ============================================
+           事件绑定（页面加载完成后执行）
+           ============================================ */
+        window.onload = function () {
+            // ---- 公共：侧边栏折叠 / 子菜单展开 ----
+            var sidebar = document.getElementById('sidebar');
+            var toggleBtn = document.getElementById('toggleBtn');
+            toggleBtn.onclick = function () {
+                sidebar.classList.toggle('collapsed');
+            };
+            var parents = document.querySelectorAll('.menu-parent');
+            for (var i = 0; i < parents.length; i++) {
+                parents[i].onclick = function () {
+                    this.parentNode.classList.toggle('open');
+                };
+            }
+
+            // ---- 初始化页面（判断新增 / 编辑模式并回填） ----
+            initPage();
+
+            // ---- 返回按钮：跳回月卡管理页面 ----
+            document.getElementById('btnBack').onclick = function () {
+                location.href = 'monthCard.html';
+            };
+
+            // ---- 重置按钮 ----
+            document.getElementById('btnReset').onclick = doReset;
+
+            // ---- 确定按钮 ----
+            document.getElementById('btnSave').onclick = doSave;
+
+            // ---- 日期变化时自动计算剩余天数与状态预览 ----
+            document.getElementById('fStart').onchange = refreshPreview;
+            document.getElementById('fEnd').onchange = refreshPreview;
+
+            // ---- 输入时清除对应字段的错误提示（体验更友好） ----
+            var fieldMap = {
+                'fPlate': 'errPlate', 'fOwner': 'errOwner', 'fPhone': 'errPhone',
+                'fPay': 'errPay', 'fStart': 'errStart', 'fEnd': 'errEnd'
+            };
+            for (var key in fieldMap) {
+                (function (inputId, errId) {
+                    document.getElementById(inputId).oninput = function () {
+                        document.getElementById(errId).textContent = '';
+                    };
+                })(key, fieldMap[key]);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<!-- ================================================
+     页面：工作台首页 index.html
+     说明：园区后台管理系统 - 三页面之一（首页）
+           1. 4 个统计卡片：年度累计收费 / 入驻企业总数 / 一体杆总数 / 月卡车辆总数
+           2. 快捷入口 + 扩展占位容器
+           3. 数据与视图分离：数据存 localStorage（key: monthCardData），
+              封装 renderHomeStat() 渲染函数，页面加载时调用
+     ================================================ -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作台 - 园区后台管理系统</title>
+    <style>
+        /* ============================================
+           公共样式（三个页面共用同一套布局样式）
+           整体结构：左侧侧边栏 + 右侧主区域（顶栏 + 内容）
+           ============================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            min-width: 900px;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* 大容器：侧边栏 + 主区域左右并排 */
+        .layout { display: flex; min-height: 100vh; }
+
+        /* ---------- 左侧侧边栏 ---------- */
+        .sidebar {
+            width: 220px;
+            background: #2f4050;
+            overflow: hidden;
+            transition: width 0.3s;
+        }
+        /* 侧边栏内部再包一层固定宽度，保证收起时文字不换行 */
+        .sidebar-inner { width: 220px; }
+        /* 收起状态：宽度变为 0（配合顶栏折叠按钮） */
+        .sidebar.collapsed { width: 0; }
+
+        /* 顶部标题栏（侧边栏内） */
+        .logo {
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            background: #263445;
+            white-space: nowrap;
+        }
+
+        /* 一级菜单项 */
+        .menu-item {
+            display: block;
+            height: 46px;
+            line-height: 46px;
+            padding: 0 20px;
+            color: #a7b1c2;
+            cursor: pointer;
+            white-space: nowrap;
+            position: relative;
+        }
+        .menu-item:hover { background: #263445; color: #fff; }
+        /* 选中高亮：给当前页面对应的菜单项加 active 类 */
+        .menu-item.active { background: #409eff; color: #fff; }
+
+        /* 有子菜单的父级右侧箭头（用 CSS 画小三角） */
+        .menu-item .arrow {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            margin-top: -2px;
+            width: 0;
+            height: 0;
+            border: 5px solid transparent;
+            border-top-color: #a7b1c2;
+            transition: transform 0.3s;
+        }
+        /* 父级展开时箭头旋转 180 度 */
+        li.open > .menu-item .arrow { transform: rotate(180deg); }
+
+        /* 子菜单：默认隐藏，父级加 open 类后显示 */
+        .submenu { display: none; background: #22303d; }
+        li.open > .submenu { display: block; }
+        .submenu a {
+            display: block;
+            height: 40px;
+            line-height: 40px;
+            padding-left: 46px;
+            color: #9aa7b5;
+            white-space: nowrap;
+        }
+        .submenu a:hover { color: #fff; }
+        /* 子菜单选中高亮 */
+        .submenu a.active { color: #409eff; font-weight: bold; }
+
+        /* ---------- 右侧主区域 ---------- */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        /* 顶部头部：左侧折叠按钮 + 系统名称，右侧登录账号 */
+        .topbar {
+            height: 60px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+        .topbar-left { display: flex; align-items: center; }
+        /* 折叠按钮：用三条 CSS 横线画图标 */
+        .toggle-btn {
+            width: 34px;
+            height: 34px;
+            margin-right: 14px;
+            border: 1px solid #dcdfe6;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+        .toggle-btn span { display: block; width: 16px; height: 2px; background: #333; }
+        .system-name { font-size: 17px; font-weight: bold; }
+
+        /* 右侧登录账号区域 */
+        .account { display: flex; align-items: center; }
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #409eff;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        .user-name { font-size: 14px; }
+
+        /* 内容区 */
+        .content { padding: 20px; }
+        /* 每个页面的标题条 */
+        .page-title {
+            background: #fff;
+            padding: 14px 20px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ============================================
+           本页面样式：工作台首页
+           ============================================ */
+
+        /* ---------- 统计卡片 ---------- */
+        .stat-list { display: flex; gap: 16px; }
+        .stat-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 6px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+        /* 卡片左侧的彩色图标方块（用文字代替图标，简单清晰） */
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            flex: none;
+        }
+        .icon-blue { background: #409eff; }
+        .icon-green { background: #67c23a; }
+        .icon-orange { background: #e6a23c; }
+        .icon-purple { background: #9254de; }
+        .stat-title { font-size: 13px; color: #909399; margin-bottom: 8px; }
+        .stat-num { display: flex; align-items: baseline; }
+        .stat-value { font-size: 26px; font-weight: bold; line-height: 1; }
+        .stat-unit { font-size: 12px; color: #909399; margin-left: 6px; }
+
+        /* ---------- 面板（快捷入口 / 扩展占位） ---------- */
+        .panel {
+            background: #fff;
+            border-radius: 6px;
+            padding: 18px 20px;
+            margin-top: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+        .panel h3 {
+            font-size: 15px;
+            margin-bottom: 14px;
+            padding-left: 8px;
+            border-left: 3px solid #409eff;
+            line-height: 1.2;
+        }
+        /* 快捷入口：一排小方块按钮 */
+        .quick-list { display: flex; gap: 14px; }
+        .quick-item {
+            flex: 0 0 170px;
+            border: 1px solid #e4e7ed;
+            border-radius: 6px;
+            padding: 16px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-item .q-title { font-size: 15px; font-weight: bold; }
+        .quick-item .q-desc { font-size: 12px; color: #909399; margin-top: 6px; }
+        .quick-item:hover {
+            border-color: #409eff;
+            color: #409eff;
+            box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+        }
+        .quick-item:hover .q-desc { color: #409eff; }
+        /* 扩展占位容器：虚线框，预留给以后扩展的功能模块 */
+        .ext-placeholder {
+            border: 1px dashed #c0c4cc;
+            border-radius: 6px;
+            color: #909399;
+            padding: 40px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- ============ 左侧侧边导航栏 ============ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-inner">
+                <div class="logo">园区后台管理系统</div>
+                <ul class="menu">
+                    <!-- 工作台：当前页，高亮 -->
+                    <li>
+                        <a class="menu-item active" href="index.html">工作台</a>
+                    </li>
+                    <!-- 月卡管理：父菜单，点击展开/收起子菜单 -->
+                    <li>
+                        <div class="menu-item menu-parent">月卡管理 <i class="arrow"></i></div>
+                        <ul class="submenu">
+                            <li><a href="monthCard.html">月卡列表</a></li>
+                            <li><a href="addMonthCard.html">增加月卡</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- ============ 右侧主区域 ============ -->
+        <div class="main">
+            <!-- 顶部头部：折叠按钮 + 系统名称 | 登录账号 -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="toggle-btn" id="toggleBtn" title="折叠/展开菜单">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <div class="system-name">园区后台管理系统</div>
+                </div>
+                <div class="account">
+                    <div class="avatar">管</div>
+                    <span class="user-name">admin（超级管理员）</span>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="content">
+                <div class="page-title">工作台</div>
+
+                <!-- 4 个统计卡片（数值由 JS 渲染函数填充） -->
+                <div class="stat-list">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue">¥</div>
+                        <div class="stat-info">
+                            <div class="stat-title">年度累计收费</div>
+                            <div class="stat-num">
+                                <span class="stat-value" id="statFee">-</span>
+                                <span class="stat-unit">元</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green">企</div>
+                        <div class="stat-info">
+                            <div class="stat-title">入驻企业总数</div>
+                            <div class="stat-num">
+                                <span class="stat-value" id="statCompany">-</span>
+                                <span class="stat-unit">家</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-orange">杆</div>
+                        <div class="stat-info">
+                            <div class="stat-title">一体杆总数</div>
+                            <div class="stat-num">
+                                <span class="stat-value" id="statPole">-</span>
+                                <span class="stat-unit">根</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple">车</div>
+                        <div class="stat-info">
+                            <div class="stat-title">月卡车辆总数</div>
+                            <div class="stat-num">
+                                <span class="stat-value" id="statCard">-</span>
+                                <span class="stat-unit">辆</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快捷入口 -->
+                <div class="panel">
+                    <h3>快捷入口</h3>
+                    <div class="quick-list">
+                        <a class="quick-item" href="monthCard.html">
+                            <div class="q-title">月卡列表</div>
+                            <div class="q-desc">查看、续费、删除月卡</div>
+                        </a>
+                        <a class="quick-item" href="addMonthCard.html">
+                            <div class="q-title">增加月卡</div>
+                            <div class="q-desc">新增车辆月卡登记</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 扩展占位容器：预留扩展位置 -->
+                <div class="panel">
+                    <h3>扩展功能区</h3>
+                    <div class="ext-placeholder">预留扩展占位：可在此继续添加更多功能模块</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================
+           数据源定义（三个页面共用同一个 localStorage key）
+           ============================================ */
+        var STORAGE_KEY = 'monthCardData'; // localStorage 存储 key（勿改，多页面共用）
+
+        // 模拟固定值（首页统计卡片使用）
+        var MOCK_FEE = 1286500;     // 年度累计收费（元），模拟固定值
+        var MOCK_COMPANY = 126;     // 入驻企业总数，模拟固定值
+        var MOCK_POLE = 58;         // 一体杆总数，模拟固定值
+
+        /* 默认模拟月卡数据：localStorage 中没有数据时首次加载使用 */
+        function getDefaultCards() {
+            return [
+                { id: 1001, plate: '赣A12345', ownerName: '张伟', phone: '13800000001', payAmount: 3600, startDate: '2026-01-01', endDate: '2026-12-31' },
+                { id: 1002, plate: '京B88888', ownerName: '李娜', phone: '13900000002', payAmount: 3600, startDate: '2026-01-15', endDate: '2027-01-14' },
+                { id: 1003, plate: '粤C66666', ownerName: '王强', phone: '13700000003', payAmount: 1800, startDate: '2026-03-01', endDate: '2026-08-31' },
+                { id: 1004, plate: '浙D77777', ownerName: '赵敏', phone: '13600000004', payAmount: 1200, startDate: '2025-11-01', endDate: '2026-09-01' },
+                { id: 1005, plate: '苏E55555', ownerName: '陈杰', phone: '13500000005', payAmount: 2400, startDate: '2026-06-01', endDate: '2027-05-31' },
+                { id: 1006, plate: '沪A99999', ownerName: '刘芳', phone: '13400000006', payAmount: 3600, startDate: '2026-07-01', endDate: '2027-06-30' }
+            ];
+        }
+
+        /* ============================================
+           localStorage 读写函数
+           ============================================ */
+
+        // 读取月卡数据：localStorage 有数据则读取，没有则写入默认模拟数据
+        function readMonthCardData() {
+            var data = localStorage.getItem(STORAGE_KEY);
+            var list;
+            if (data === null) {
+
+                list = getDefaultCards();
+            } else {
+
+                list = JSON.parse(data);
+            }
+
+            for (var i = 0; i < list.length; i++) {
+                updateCardState(list[i]);
+            }
+            saveMonthCardData(list);
+            return list;
+        }
+
+
+        function saveMonthCardData(list) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        }
+
+        /* ============================================
+           工具函数
+           ============================================ */
+
+        // 把数字按千分位格式化：1286500 -> "1,286,500"
+        function formatMoney(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // 补零：9 -> "09"
+        function padZero(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        // 获取今天的日期字符串，格式：2026-09-07
+        function getToday() {
+            var d = new Date();
+            return d.getFullYear() + '-' + padZero(d.getMonth() + 1) + '-' + padZero(d.getDate());
+        }
+
+        // 计算两个日期字符串之间相差的天数（dateStr2 - dateStr1），
+        // 用 Date.UTC 换算成时间戳后相除，避免时区干扰
+        function daysBetween(dateStr1, dateStr2) {
+            var a = dateStr1.split('-');
+            var b = dateStr2.split('-');
+            var t1 = Date.UTC(Number(a[0]), Number(a[1]) - 1, Number(a[2]));
+            var t2 = Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2]));
+            return Math.round((t2 - t1) / (24 * 60 * 60 * 1000));
+        }
+
+        // 刷新单张月卡的“剩余有效天数 remainDay”和“状态 status”
+        // 规则：结束日期 >= 今天 -> 可用(0)；结束日期 < 今天 -> 已过期(1)
+        // 说明：日期字符串 "2026-12-31" 可直接用 < 比较大小
+        function updateCardState(card) {
+            var today = getToday();
+            card.remainDay = daysBetween(today, card.endDate);
+            if (card.remainDay < 0) {
+                card.remainDay = 0; // 过期后剩余天数按 0 显示
+            }
+            card.status = (card.endDate < today) ? 1 : 0;
+        }
+
+        /* ============================================
+           首页统计卡片渲染函数（数据与视图分离）
+           ============================================ */
+        function renderHomeStat() {
+            var list = readMonthCardData();
+
+            document.getElementById('statFee').textContent = formatMoney(MOCK_FEE);
+            document.getElementById('statCompany').textContent = MOCK_COMPANY;
+            document.getElementById('statPole').textContent = MOCK_POLE;
+
+            document.getElementById('statCard').textContent = list.length;
+        }
+
+        /* ============================================
+           公共交互脚本（三个页面相同）
+           1. 顶栏折叠按钮：侧边栏整体收起 / 展开
+           2. 父级菜单：点击展开 / 收起子菜单
+           ============================================ */
+        window.onload = function () {
+            // 1. 折叠按钮：给 sidebar 切换 collapsed 类（CSS 控制宽度变化）
+            var sidebar = document.getElementById('sidebar');
+            var toggleBtn = document.getElementById('toggleBtn');
+            toggleBtn.onclick = function () {
+                sidebar.classList.toggle('collapsed');
+            };
+
+            // 2. 父级菜单“月卡管理”：点击切换 open 类，控制子菜单显示/隐藏
+            var parents = document.querySelectorAll('.menu-parent');
+            for (var i = 0; i < parents.length; i++) {
+                parents[i].onclick = function () {
+                    this.parentNode.classList.toggle('open');
+                };
+            }
+
+            // 3. 页面加载完成后调用渲染函数，渲染统计卡片
+            renderHomeStat();
+        };
+    </script>
+</body>
+</html>
