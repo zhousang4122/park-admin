@@ -1,11 +1,4 @@
 <!DOCTYPE html>
-<!-- ================================================
-     页面：月卡管理列表页 monthCard.html
-     说明：园区后台管理系统 - 三页面之一（月卡列表）
-           功能：查询筛选 / 添加月卡跳转 / 表格渲染 / 查看-编辑-续费弹窗 /
-                 单条删除 / 全选与批量删除 / 前端分页 / localStorage 持久化
-           数据与视图分离：renderTable() 渲染表格，修改数据后重新渲染
-     ================================================ -->
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -13,8 +6,7 @@
     <title>月卡管理 - 园区后台管理系统</title>
     <style>
         /* ============================================
-           公共样式（三个页面共用同一套布局样式）
-           整体结构：左侧侧边栏 + 右侧主区域（顶栏 + 内容）
+           公共样式左侧侧边栏 + 右侧主区域（顶栏 + 内容）
            ============================================ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -36,9 +28,9 @@
             overflow: hidden;
             transition: width 0.3s;
         }
-        /* 侧边栏内部再包一层固定宽度，保证收起时文字不换行 */
+        /*侧边栏内高度*/
         .sidebar-inner { width: 220px; }
-        /* 收起状态：宽度变为 0（配合顶栏折叠按钮） */
+        /* 收起状态 */
         .sidebar.collapsed { width: 0; }
 
         /* 顶部标题栏（侧边栏内） */
@@ -731,12 +723,12 @@
            查询 / 重置
            ============================================ */
 
-        // 查询：按关键字 + 状态过滤，重置页码为第 1 页后重新渲染
+
         function doSearch() {
             var keyword = document.getElementById('searchKeyword').value.trim();
             var statusVal = document.getElementById('searchStatus').value;
 
-            // 用 filter() 对数组做条件过滤（关键字模糊匹配车牌/车主/手机号）
+
             filteredCards = allCards.filter(function (c) {
                 var matchKeyword = true;
                 if (keyword !== '') {
@@ -758,14 +750,12 @@
         function doReset() {
             document.getElementById('searchKeyword').value = '';
             document.getElementById('searchStatus').value = '';
-            filteredCards = allCards.slice(); 
+            filteredCards = allCards.slice();
             currentPage = 1;
             renderTable();
         }
 
-        /* ============================================
-           弹窗逻辑（查看 / 编辑 / 续费 复用同一个弹窗）
-           ============================================ */
+
         var modalMode = 'view'; // 当前弹窗模式：view / edit / renew
         var modalCardId = null; // 当前弹窗对应的月卡 id
 
@@ -793,22 +783,22 @@
             var modalCancel = document.getElementById('modalCancel');
 
             if (mode === 'view') {
-                // ---- 查看模式：标题“查看月卡”，全部字段只读，只能关闭 ----
+                // ---- 查看模式：全部字段只读，只能关闭 ----
                 modalTitle.textContent = '查看月卡';
                 setFormReadonly(true);
-                modalSave.style.display = 'none';   // 查看时没有“保存”按钮
+                modalSave.style.display = 'none';
                 modalCancel.textContent = '关闭';
             } else if (mode === 'edit') {
-                // ---- 编辑模式：标题“编辑月卡”，全部字段可修改 ----
+                // ---- 编辑模式：全部字段可修改 ----
                 modalTitle.textContent = '编辑月卡';
                 setFormReadonly(false);
                 modalSave.style.display = '';
                 modalCancel.textContent = '取消';
             } else {
-                // ---- 续费模式：标题“续费”，只允许改缴费相关，车辆信息只读 ----
+                // ---- 续费模式：改缴费相关，车辆信息只读 ----
                 modalTitle.textContent = '续费';
                 setFormReadonly(false);
-                // 车辆信息字段置为只读：车牌、车主、手机号
+                // 车辆信息字段置为只读
                 document.getElementById('fPlate').readOnly = true;
                 document.getElementById('fOwner').readOnly = true;
                 document.getElementById('fPhone').readOnly = true;
@@ -824,7 +814,7 @@
             document.getElementById('modalMask').classList.add('show');
         }
 
-        // 快捷入口：查看 / 编辑 / 续费
+        // 查看 / 编辑 / 续费
         function openView(id) { openModal('view', id); }
         function openEdit(id) { openModal('edit', id); }
         function openRenew(id) { openModal('renew', id); }
@@ -836,15 +826,13 @@
                 document.getElementById(ids[i]).readOnly = isReadonly;
             }
         }
-
-        // 关闭弹窗
         function closeModal() {
             document.getElementById('modalMask').classList.remove('show');
             modalCardId = null;
         }
 
-        // 当结束日期变化时（或每次打开弹窗时）调用：
-        // 按“结束日期 - 今天”自动计算剩余天数与状态并显示
+        // 当结束日期变化时、每次打开弹窗时调用：
+        // 计算剩余天数与状态并显示
         function refreshModalState() {
             var endDate = document.getElementById('fEnd').value;
             if (endDate === '') {
@@ -913,10 +901,6 @@
             closeModal();
             renderTable();
         }
-
-        /* ============================================
-           删除：单条删除 / 批量删除
-           ============================================ */
 
         // 单条删除：浏览器 confirm() 二次确认后过滤数组
         function deleteOne(id) {
