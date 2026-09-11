@@ -347,9 +347,16 @@
                     <h3>缴费信息</h3>
                     <div class="form-grid">
                         <div class="field">
+                            <label>每月费用(元/月)<span class="red">*</span></label>
+                            <input type="number" id="fMonthPrice" min="1" placeholder="默认 300，可修改">
+                            <span class="err" id="errPrice"></span>
+                            <span class="hint">计费标准：修改后自动保存，下次打开页面仍然生效</span>
+                        </div>
+                        <div class="field">
                             <label>缴费金额(元)<span class="red">*</span></label>
-                            <input type="number" id="fPay" min="0" placeholder="如：3600">
+                            <input type="number" id="fPay" min="0" placeholder="如：900">
                             <span class="err" id="errPay"></span>
+                            <span class="hint">购买时长 = 缴费金额 ÷ 每月费用（一个月按 30 天折算）</span>
                         </div>
                         <div class="field">
                             <label>开始日期<span class="red">*</span></label>
@@ -357,13 +364,19 @@
                             <span class="err" id="errStart"></span>
                         </div>
                         <div class="field">
-                            <label>结束日期<span class="red">*</span></label>
-                            <input type="date" id="fEnd">
+                            <label>结束日期（自动计算，不可手动选择）</label>
+                            <input type="date" id="fEnd" readonly>
                             <span class="err" id="errEnd"></span>
+                            <span class="hint">由「开始日期 + 购买时长」自动推算</span>
+                        </div>
+                        <div class="field">
+                            <label>购买时长（自动计算）</label>
+                            <input type="text" id="fDuration" readonly placeholder="填写金额后自动计算">
+                            <span class="hint">例：缴费 900 元、每月 300 元 = 3.0 个月（共 90 天）</span>
                         </div>
                         <div class="field">
                             <label>剩余有效天数（自动计算）</label>
-                            <input type="text" id="fRemain" readonly placeholder="选择日期后自动计算">
+                            <input type="text" id="fRemain" readonly placeholder="自动计算">
                             <span class="hint">剩余天数 = 结束日期 - 今天</span>
                         </div>
                         <div class="field">
@@ -428,6 +441,27 @@
         }
 
         /* ============================================
+           计费设置：每月费用（元/月）
+           保存在 localStorage 中，可在页面上修改，作为"缴费金额 -> 时长"的换算标准
+           ============================================ */
+        var PRICE_KEY = 'monthCardPrice'; // 每月费用存储 key
+        var DAYS_PER_MONTH = 30;          // 一个月按 30 天折算（简化计算）
+
+        // 读取每月费用：没有保存过则使用默认值 300 元/月
+        function readMonthPrice() {
+            var price = localStorage.getItem(PRICE_KEY);
+            if (price === null || Number(price) <= 0) {
+                return 300;
+            }
+            return Number(price);
+        }
+
+        // 保存每月费用
+        function saveMonthPrice(price) {
+            localStorage.setItem(PRICE_KEY, String(price));
+        }
+
+        /* ============================================
            工具函数
            ============================================ */
 
@@ -449,6 +483,14 @@
             var t1 = Date.UTC(Number(a[0]), Number(a[1]) - 1, Number(a[2]));
             var t2 = Date.UTC(Number(b[0]), Number(b[1]) - 1, Number(b[2]));
             return Math.round((t2 - t1) / (24 * 60 * 60 * 1000));
+        }
+
+        // 日期字符串加天数：addDays('2026-01-01', 30) -> '2026-01-31'
+        function addDays(dateStr, days) {
+            var a = dateStr.split('-');
+            var t = Date.UTC(Number(a[0]), Number(a[1]) - 1, Number(a[2])) + days * 24 * 60 * 60 * 1000;
+            var d = new Date(t);
+            return d.getUTCFullYear() + '-' + padZero(d.getUTCMonth() + 1) + '-' + padZero(d.getUTCDate());
         }
 
         // 刷新单张月卡：剩余天数 remainDay / 状态 status（0 可用，1 已过期）
@@ -488,6 +530,53 @@
         }
 
         /* ============================================
+           缴费金额 -> 购买时长 -> 自动推算结束日期
+           规则：时长天数 = 缴费金额 ÷ 每月费用 × 30（四舍五入取整）
+                 结束日期 = 开始日期 + 时长天数（结束日期只读，不能手动选择）
+           ============================================ */
+        function recalcEndDate() {
+            var pay = Number(document.getElementById('fPay').value);          // 缴费金额
+            var price = Number(document.getElementById('fMonthPrice').value);  // 每月费用
+            var startDate = document.getElementById('fStart').value;           // 开始日期
+            var endInput = document.getElementById('fEnd');
+            var durationInput = document.getElementById('fDuration');
+
+            // 金额或每月费用不合法：清空自动计算结果
+            if (pay <= 0 || price <= 0) {
+                durationInput.value = '';
+                endInput.value = '';
+                refreshPreview();
+                return;
+            }
+            // 1. 由缴费金额算出购买时长
+            var months = pay / price;
+            var days = Math.round(months * DAYS_PER_MONTH);
+            durationInput.value = months.toFixed(1) + ' 个月（共 ' + days + ' 天）';
+            // 2. 由开始日期 + 购买时长自动推算结束日期
+            if (startDate === '') {
+                endInput.value = '';
+            } else {
+                endInput.value = addDays(startDate, days);
+            }
+            refreshPreview();
+        }
+
+        // 编辑模式回填后调用：按记录里已有的开始/结束日期显示购买时长
+        function showDurationByDates() {
+            var startDate = document.getElementById('fStart').value;
+            var endDate = document.getElementById('fEnd').value;
+            if (startDate === '' || endDate === '') {
+                return;
+            }
+            var days = daysBetween(startDate, endDate);
+            if (days < 0) {
+                days = 0;
+            }
+            document.getElementById('fDuration').value = (days / DAYS_PER_MONTH).toFixed(1) +
+                ' 个月（共 ' + days + ' 天）';
+        }
+
+        /* ============================================
            自动计算显示：剩余有效天数 / 状态
            规则：remainDay = 结束日期 - 今天（不小于 0）
                  status = 结束日期晚于今天 ? 可用 : 已过期
@@ -521,7 +610,7 @@
 
         // 清空全部错误提示
         function clearErrors() {
-            var errIds = ['errPlate', 'errOwner', 'errPhone', 'errPay', 'errStart', 'errEnd', 'errRemark'];
+            var errIds = ['errPlate', 'errOwner', 'errPhone', 'errPay', 'errPrice', 'errStart', 'errEnd', 'errRemark'];
             for (var i = 0; i < errIds.length; i++) {
                 document.getElementById(errIds[i]).textContent = '';
             }
@@ -536,6 +625,7 @@
             var owner = document.getElementById('fOwner').value.trim();
             var phone = document.getElementById('fPhone').value.trim();
             var pay = document.getElementById('fPay').value;
+            var price = document.getElementById('fMonthPrice').value;
             var startDate = document.getElementById('fStart').value;
             var endDate = document.getElementById('fEnd').value;
 
@@ -558,6 +648,11 @@
                 ok = false;
             } else if (!PHONE_REG.test(phone)) {
                 setError('errPhone', '手机号格式不正确（应为 1 开头的 11 位数字）');
+                ok = false;
+            }
+            // 每月费用：必须为正数（否则无法把缴费金额换算成时长）
+            if (price === '' || Number(price) <= 0) {
+                setError('errPrice', '每月费用必须大于 0');
                 ok = false;
             }
             // 缴费金额：必填 + 必须为正数
@@ -592,8 +687,10 @@
             document.getElementById('fPhone').value = '';
             document.getElementById('fRemark').value = '';
             document.getElementById('fPay').value = '';
+            document.getElementById('fMonthPrice').value = readMonthPrice(); // 每月费用恢复为已保存的设置
             document.getElementById('fStart').value = '';
             document.getElementById('fEnd').value = '';
+            document.getElementById('fDuration').value = '';
             document.getElementById('fRemain').value = '';
             document.getElementById('fStatus').value = '';
             clearErrors(); // 同时清除页面上的校验错误提示
@@ -604,21 +701,25 @@
            -> 写入 localStorage -> 跳回月卡管理页面
            ============================================ */
         function doSave() {
-            // 1. 先校验，校验不通过直接返回，阻止提交
+            // 1. 先按缴费金额与每月费用自动推算结束日期（结束日期只读，保存前再算一次更稳妥）
+            recalcEndDate();
+
+            // 2. 表单校验，校验不通过直接返回，阻止提交
             if (!validateForm()) {
                 return;
             }
 
-            // 2. 读取表单所有输入框的值
+            // 3. 读取表单所有输入框的值
             var plate = document.getElementById('fPlate').value.trim();
             var owner = document.getElementById('fOwner').value.trim();
             var phone = document.getElementById('fPhone').value.trim();
             var pay = Number(document.getElementById('fPay').value);
+            var price = Number(document.getElementById('fMonthPrice').value); // 每月费用（计费标准）
             var startDate = document.getElementById('fStart').value;
             var endDate = document.getElementById('fEnd').value;
             var remark = document.getElementById('fRemark').value.trim();
 
-            // 3. 组装完整月卡对象（先不写死 remainDay/status，交给下面的函数计算）
+            // 4. 组装完整月卡对象（先不写死 remainDay/status，交给下面的函数计算）
             var card = {
                 id: pageId,                 // 新增模式下面会被 Date.now() 替换
                 plate: plate,
@@ -629,10 +730,10 @@
                 endDate: endDate,
                 remark: remark
             };
-            // 4. 按结束日期自动计算剩余天数与状态（写入 remainDay / status）
+            // 5. 按结束日期自动计算剩余天数与状态（写入 remainDay / status）
             updateCardState(card);
 
-            // 5. 读取本地数据源，新增用 push，编辑用替换
+            // 6. 读取本地数据源，新增用 push，编辑用替换
             var list = readMonthCardData();
             if (pageId === null) {
                 // ---- 新增模式：用 Date.now() 生成唯一 id 后追加到数组末尾 ----
@@ -648,10 +749,11 @@
                 }
             }
 
-            // 6. 保存到 localStorage（刷新后数据不丢失）
+            // 7. 保存到 localStorage（刷新后数据不丢失），并记住每月费用设置
             saveMonthCardData(list);
+            saveMonthPrice(price);
 
-            // 7. 保存成功提示并跳转回月卡管理页面
+            // 8. 保存成功提示并跳转回月卡管理页面
             alert('保存成功！');
             location.href = 'monthCard.html';
         }
@@ -667,7 +769,7 @@
                 // ---- 新增模式：页面标题与提示条显示“新增” ----
                 pageId = null;
                 document.getElementById('pageTitleText').textContent = '增加月卡';
-                modeTip.textContent = '新增模式：请填写车辆与缴费信息，点击「确定」保存';
+                modeTip.textContent = '新增模式：填写缴费金额与开始日期，系统自动计算购买时长与结束日期';
             } else {
                 // ---- 编辑模式：根据 id 查询对应月卡数据并回填表单 ----
                 pageId = Number(idParam);
@@ -680,7 +782,7 @@
                     location.href = 'monthCard.html';
                     return;
                 }
-                modeTip.textContent = '编辑模式：正在修改编号 ' + card.id + ' 的月卡信息';
+                modeTip.textContent = '编辑模式：正在修改编号 ' + card.id + ' 的月卡信息（改动缴费金额会自动重算结束日期）';
                 // 表单回填
                 document.getElementById('fPlate').value = card.plate;
                 document.getElementById('fOwner').value = card.ownerName;
@@ -689,7 +791,8 @@
                 document.getElementById('fPay').value = card.payAmount;
                 document.getElementById('fStart').value = card.startDate;
                 document.getElementById('fEnd').value = card.endDate;
-                refreshPreview(); // 回填后刷新剩余天数与状态预览
+                refreshPreview();      // 回填后刷新剩余天数与状态预览
+                showDurationByDates(); // 按原有起止日期显示购买时长
             }
         }
 
@@ -710,6 +813,9 @@
                 };
             }
 
+            // ---- 载入每月费用设置（localStorage 中保存的计费标准） ----
+            document.getElementById('fMonthPrice').value = readMonthPrice();
+
             // ---- 初始化页面（判断新增 / 编辑模式并回填） ----
             initPage();
 
@@ -724,19 +830,24 @@
             // ---- 确定按钮 ----
             document.getElementById('btnSave').onclick = doSave;
 
-            // ---- 日期变化时自动计算剩余天数与状态预览 ----
-            document.getElementById('fStart').onchange = refreshPreview;
+            // ---- 开始日期变化时：重算购买时长与结束日期 ----
+            document.getElementById('fStart').onchange = recalcEndDate;
+
+            // ---- 结束日期变化时刷新剩余天数与状态预览 ----
             document.getElementById('fEnd').onchange = refreshPreview;
 
-            // ---- 输入时清除对应字段的错误提示（体验更友好） ----
+            // ---- 输入时清除对应字段的错误提示；缴费金额/每月费用变化时同时重算时长与结束日期 ----
             var fieldMap = {
                 'fPlate': 'errPlate', 'fOwner': 'errOwner', 'fPhone': 'errPhone',
-                'fPay': 'errPay', 'fStart': 'errStart', 'fEnd': 'errEnd'
+                'fPay': 'errPay', 'fMonthPrice': 'errPrice', 'fStart': 'errStart', 'fEnd': 'errEnd'
             };
             for (var key in fieldMap) {
                 (function (inputId, errId) {
                     document.getElementById(inputId).oninput = function () {
                         document.getElementById(errId).textContent = '';
+                        if (inputId === 'fPay' || inputId === 'fMonthPrice') {
+                            recalcEndDate(); // 金额或计费标准改变，重新计算购买时长与结束日期
+                        }
                     };
                 })(key, fieldMap[key]);
             }

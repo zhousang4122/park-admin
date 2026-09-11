@@ -231,15 +231,20 @@
             box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
         }
         .quick-item:hover .q-desc { color: #409eff; }
-        /* 扩展占位容器：虚线框，预留给以后扩展的功能模块 */
-        .ext-placeholder {
-            border: 1px dashed #c0c4cc;
+        /* 扩展功能区：月卡数据小统计（文档要求的"扩展占位容器"落地成一个小功能） */
+        .ext-list { display: flex; gap: 14px; }
+        .ext-item {
+            flex: 1;
+            background: #f7f9fc;
+            border: 1px solid #ebeef5;
             border-radius: 6px;
-            color: #909399;
-            padding: 40px;
-            text-align: center;
-            font-size: 14px;
+            padding: 14px 16px;
         }
+        .ext-label { font-size: 13px; color: #909399; margin-bottom: 8px; }
+        .ext-value { font-size: 22px; font-weight: bold; color: #409eff; }
+        .ext-value.green { color: #67c23a; }
+        .ext-value.red { color: #f56c6c; }
+        .ext-note { margin-top: 12px; font-size: 12px; color: #909399; }
     </style>
 </head>
 <body>
@@ -344,10 +349,24 @@
                     </div>
                 </div>
 
-                <!-- 扩展占位容器：预留扩展位置 -->
+                <!-- 扩展功能区：月卡数据概览（数据来自月卡列表，随增删改自动变化） -->
                 <div class="panel">
-                    <h3>扩展功能区</h3>
-                    <div class="ext-placeholder">预留扩展占位：可在此继续添加更多功能模块</div>
+                    <h3>扩展功能区：月卡数据概览</h3>
+                    <div class="ext-list">
+                        <div class="ext-item">
+                            <div class="ext-label">可用月卡</div>
+                            <div class="ext-value green" id="extValid">-</div>
+                        </div>
+                        <div class="ext-item">
+                            <div class="ext-label">已过期月卡</div>
+                            <div class="ext-value red" id="extExpired">-</div>
+                        </div>
+                        <div class="ext-item">
+                            <div class="ext-label">累计缴费金额(元)</div>
+                            <div class="ext-value" id="extFeeSum">-</div>
+                        </div>
+                    </div>
+                    <div class="ext-note">数据来源：月卡列表（localStorage 中的 monthCardData），月卡增删改后本区域自动同步</div>
                 </div>
             </div>
         </div>
@@ -460,6 +479,30 @@
         }
 
         /* ============================================
+           扩展功能区渲染函数：月卡数据概览
+           统计可用 / 已过期月卡数量，以及累计缴费金额（动态求和）
+           ============================================ */
+        function renderExtStat() {
+            var list = readMonthCardData();
+            var validCount = 0;   // 可用月卡数量
+            var expiredCount = 0; // 已过期月卡数量
+            var feeSum = 0;       // 累计缴费金额
+
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].status === 0) {
+                    validCount++;
+                } else {
+                    expiredCount++;
+                }
+                feeSum += Number(list[i].payAmount) || 0;
+            }
+
+            document.getElementById('extValid').textContent = validCount + ' 张';
+            document.getElementById('extExpired').textContent = expiredCount + ' 张';
+            document.getElementById('extFeeSum').textContent = formatMoney(feeSum);
+        }
+
+        /* ============================================
            公共交互脚本（三个页面相同）
            1. 顶栏折叠按钮：侧边栏整体收起 / 展开
            2. 父级菜单：点击展开 / 收起子菜单
@@ -480,8 +523,9 @@
                 };
             }
 
-            // 3. 页面加载完成后调用渲染函数，渲染统计卡片
+            // 3. 页面加载完成后调用渲染函数：渲染统计卡片 + 扩展功能区概览
             renderHomeStat();
+            renderExtStat();
         };
     </script>
 </body>
