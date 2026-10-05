@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1981" height="206" viewBox="0 0 1981 206" font-family="Noto Sans CJK SC, Microsoft YaHei, Segoe UI, sans-serif">
+<rect width="1981" height="206" fill="#0E1218"/>
+<path d="M331.4,103 C363.4,103 363.4,103 395.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(395.4,103) rotate(0.0)"/>
+<path d="M137.4,103 C169.4,103 169.4,103 201.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(201.4,103) rotate(0.0)"/>
+<path d="M701.4,103 C733.4,103 733.4,103 765.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(765.4,103) rotate(0.0)"/>
+<path d="M507.4,103 C539.4,103 539.4,103 571.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(571.4,103) rotate(0.0)"/>
+<path d="M1063.4,103 C1095.4,103 1095.4,47 1127.4,47" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1127.4,47) rotate(0.0)"/>
+<path d="M1063.4,103 C1095.4,103 1095.4,103 1127.4,103" fill="none" stroke="#FFD180" stroke-width="1.6" stroke-dasharray="7 5"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1127.4,103) rotate(0.0)"/>
+<path d="M869.4,103 C901.4,103 901.4,103 933.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(933.4,103) rotate(0.0)"/>
+<path d="M1425.4,103 C1457.4,103 1457.4,103 1489.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1489.4,103) rotate(0.0)"/>
+<path d="M1231.4,103 C1263.4,103 1263.4,103 1295.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1295.4,103) rotate(0.0)"/>
+<path d="M1231.4,159 C1263.4,159 1263.4,103 1295.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1295.4,103) rotate(0.0)"/>
+<path d="M1787.4,103 C1819.4,103 1819.4,103 1851.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1851.4,103) rotate(0.0)"/>
+<path d="M1593.4,103 C1625.4,103 1625.4,103 1657.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1657.4,103) rotate(0.0)"/>
+<rect x="26" y="82" width="111.4" height="42" rx="7" fill="#1B2129" stroke="#8BC34A" stroke-width="1.8"/>
+<text x="36" y="99" font-size="11.5" fill="#E6EAF0">富集硅岩矿石</text>
+<text x="36" y="114" font-size="9.5" fill="#9FB0C0">买 13.5 · 耗 13.5/分</text>
+<rect x="106.4" y="86" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#8BC34A" stroke-width="0.9"/>
+<text x="111.4" y="95.5" font-size="8.5" fill="#8BC34A">外购</text>
+<rect x="395.4" y="82" width="112" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="405.4" y="99" font-size="11.5" fill="#E6EAF0">粉碎富集硅岩矿石</text>
+<text x="405.4" y="114" font-size="9.5" fill="#9FB0C0">产 54 · 耗 54/分</text>
+<rect x="765.4" y="82" width="104" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="775.4" y="99" font-size="11.5" fill="#E6EAF0">含杂富集硅岩粉</text>
+<text x="775.4" y="114" font-size="9.5" fill="#9FB0C0">产 54 · 耗 54/分</text>
+<rect x="1127.4" y="26" width="104" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="1137.4" y="43" font-size="11.5" fill="#E6EAF0">富集硅岩粉</text>
+<text x="1137.4" y="58" font-size="9.5" fill="#9FB0C0">产 54 · 余 54/分</text>
+<rect x="1200.4" y="30" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#5AC8E8" stroke-width="0.9"/>
+<text x="1205.4" y="39.5" font-size="8.5" fill="#5AC8E8">副产</text>
+<rect x="1127.4" y="82" width="104" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="1137.4" y="99" font-size="11.5" fill="#E6EAF0">硅岩粉</text>
+<text x="1137.4" y="114" font-size="9.5" fill="#9FB0C0">产 6 · 耗 6/分</text>
+<rect x="1127.4" y="138" width="104" height="42" rx="7" fill="#1B2129" stroke="#8BC34A" stroke-width="1.8"/>
+<text x="1137.4" y="155" font-size="11.5" fill="#E6EAF0">编程电路</text>
+<text x="1137.4" y="170" font-size="9.5" fill="#9FB0C0">买 6 · 耗 6/分</text>
+<rect x="1200.4" y="142" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#8BC34A" stroke-width="0.9"/>
+<text x="1205.4" y="151.5" font-size="8.5" fill="#8BC34A">外购</text>
+<rect x="1489.4" y="82" width="104" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="1499.4" y="99" font-size="11.5" fill="#E6EAF0">热硅岩锭</text>
+<text x="1499.4" y="114" font-size="9.5" fill="#9FB0C0">产 6 · 耗 6/分</text>
+<rect x="1851.4" y="82" width="104" height="42" rx="7" fill="#1B2129" stroke="#FFD180" stroke-width="1.8"/>
+<text x="1861.4" y="99" font-size="11.5" fill="#E6EAF0">硅岩锭</text>
+<text x="1861.4" y="114" font-size="9.5" fill="#9FB0C0">产 6 · 余 6/分</text>
+<rect x="1924.4" y="86" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#FFD180" stroke-width="0.9"/>
+<text x="1929.4" y="95.5" font-size="8.5" fill="#FFD180">目标</text>
+<rect x="201.4" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="211.4" y="95" font-size="11.5" fill="#E6EAF0">粉碎富集硅岩矿石</text>
+<text x="211.4" y="111" font-size="9.5" fill="#9FB0C0">8 台 × 0.05s · 0%</text>
+<text x="211.4" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<rect x="571.4" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="581.4" y="95" font-size="11.5" fill="#E6EAF0">含杂富集硅岩粉</text>
+<text x="581.4" y="111" font-size="9.5" fill="#9FB0C0">8 台 × 0.05s · 0%</text>
+<text x="581.4" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<rect x="933.4" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="943.4" y="95" font-size="11.5" fill="#E6EAF0">硅岩粉</text>
+<text x="943.4" y="111" font-size="9.5" fill="#9FB0C0">8 台 × 5.25s · 59%</text>
+<text x="943.4" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<rect x="1295.4" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="1305.4" y="95" font-size="11.5" fill="#E6EAF0">热硅岩锭</text>
+<text x="1305.4" y="111" font-size="9.5" fill="#9FB0C0">8 台 × 1.5s · 1%</text>
+<text x="1305.4" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<rect x="1657.4" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="1667.4" y="95" font-size="11.5" fill="#E6EAF0">硅岩锭</text>
+<text x="1667.4" y="111" font-size="9.5" fill="#9FB0C0">8 台 × 2.6s · 3%</text>
+<text x="1667.4" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<text x="26" y="182" font-size="12.0" fill="#E6EAF0">硅岩锭 6/分钟 · 5 台机器 · 每台 ×8</text>
+<text x="26" y="196" font-size="9.5" fill="#9FB0C0">绿=外购输入 · 黄=目标 · 紫=线内回流 · 虚线=概率产出(期望值) · 每个物料上写的是它自己的买入/产出/消耗/余额</text>
+</svg>

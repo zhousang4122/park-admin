@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1334" height="206" viewBox="0 0 1334 206" font-family="Noto Sans CJK SC, Microsoft YaHei, Segoe UI, sans-serif">
+<rect width="1334" height="206" fill="#0E1218"/>
+<path d="M324,103 C356,103 356,103 388,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(388,103) rotate(0.0)"/>
+<path d="M130,103 C162,103 162,103 194,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(194,103) rotate(0.0)"/>
+<path d="M693.4,103 C725.4,103 725.4,159 757.4,159" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(757.4,159) rotate(0.0)"/>
+<path d="M693.4,103 C725.4,103 725.4,103 757.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(757.4,103) rotate(0.0)"/>
+<path d="M693.4,103 C725.4,103 725.4,47 757.4,47" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(757.4,47) rotate(0.0)"/>
+<path d="M499.4,103 C531.4,103 531.4,103 563.4,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(563.4,103) rotate(0.0)"/>
+<path d="M1097.7,103 C1129.7,103 1129.7,131 1161.7,131" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1161.7,131) rotate(0.0)"/>
+<path d="M1097.7,103 C1129.7,103 1129.7,75 1161.7,75" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(1161.7,75) rotate(0.0)"/>
+<path d="M903.7,103 C935.7,103 935.7,103 967.7,103" fill="none" stroke="#55636F" stroke-width="1.6"/>
+<path d="M0,0 L-7,-3.4 L-7,3.4 Z" fill="#55636F" transform="translate(967.7,103) rotate(0.0)"/>
+<rect x="26" y="82" width="104" height="42" rx="7" fill="#1B2129" stroke="#8BC34A" stroke-width="1.8"/>
+<text x="36" y="99" font-size="11.5" fill="#E6EAF0">编程电路</text>
+<text x="36" y="114" font-size="9.5" fill="#9FB0C0">买 4.5 · 耗 4.5/分</text>
+<rect x="99" y="86" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#8BC34A" stroke-width="0.9"/>
+<text x="104" y="95.5" font-size="8.5" fill="#8BC34A">外购</text>
+<rect x="388" y="82" width="111.4" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="398" y="99" font-size="11.5" fill="#E6EAF0">再沉淀铑粉</text>
+<text x="398" y="114" font-size="9.5" fill="#9FB0C0">产 31.5 · 耗 31.5/分</text>
+<rect x="757.4" y="26" width="146.3" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="767.4" y="43" font-size="11.5" fill="#E6EAF0">氢</text>
+<text x="767.4" y="58" font-size="9.5" fill="#9FB0C0">产 4500mB · 余 4500mB/分</text>
+<rect x="872.7" y="30" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#5AC8E8" stroke-width="0.9"/>
+<text x="877.7" y="39.5" font-size="8.5" fill="#5AC8E8">副产</text>
+<rect x="757.4" y="82" width="146.3" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="767.4" y="99" font-size="11.5" fill="#E6EAF0">氯化铵粉</text>
+<text x="767.4" y="114" font-size="9.5" fill="#9FB0C0">产 27 · 耗 27/分</text>
+<rect x="757.4" y="138" width="146.3" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="767.4" y="155" font-size="11.5" fill="#E6EAF0">铑粉</text>
+<text x="767.4" y="170" font-size="9.5" fill="#9FB0C0">产 4.5 · 余 4.5/分</text>
+<rect x="872.7" y="142" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#5AC8E8" stroke-width="0.9"/>
+<text x="877.7" y="151.5" font-size="8.5" fill="#5AC8E8">副产</text>
+<rect x="1161.7" y="54" width="146.3" height="42" rx="7" fill="#1B2129" stroke="#3A4550" stroke-width="1.0"/>
+<text x="1171.7" y="71" font-size="11.5" fill="#E6EAF0">氨</text>
+<text x="1171.7" y="86" font-size="9.5" fill="#9FB0C0">产 4500mB · 余 4500mB/分</text>
+<rect x="1277.1" y="58" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#5AC8E8" stroke-width="0.9"/>
+<text x="1282.1" y="67.5" font-size="8.5" fill="#5AC8E8">副产</text>
+<rect x="1161.7" y="110" width="146.3" height="42" rx="7" fill="#1B2129" stroke="#FFD180" stroke-width="1.8"/>
+<text x="1171.7" y="127" font-size="11.5" fill="#E6EAF0">氯化铱粉</text>
+<text x="1171.7" y="142" font-size="9.5" fill="#9FB0C0">产 6 · 余 6/分</text>
+<rect x="1277.1" y="114" width="27" height="13" rx="6.5" fill="#0E1218" stroke="#FFD180" stroke-width="0.9"/>
+<text x="1282.1" y="123.5" font-size="8.5" fill="#FFD180">目标</text>
+<rect x="194" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="204" y="95" font-size="11.5" fill="#E6EAF0">再沉淀铑粉</text>
+<text x="204" y="111" font-size="9.5" fill="#9FB0C0">1 台 × 0.1s · 0%</text>
+<text x="204" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<rect x="563.4" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="573.4" y="95" font-size="11.5" fill="#E6EAF0">氯化铵粉</text>
+<text x="573.4" y="111" font-size="9.5" fill="#9FB0C0">1 台 × 0.15s · 1%</text>
+<text x="573.4" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<rect x="967.7" y="75" width="130" height="56" rx="9" fill="#20272F" stroke="#5AC8E8" stroke-width="1.4"/>
+<text x="977.7" y="95" font-size="11.5" fill="#E6EAF0">氯化铱粉</text>
+<text x="977.7" y="111" font-size="9.5" fill="#9FB0C0">1 台 × 0.1s · 0%</text>
+<text x="977.7" y="125" font-size="9.5" fill="#5AC8E8">运行中</text>
+<text x="26" y="182" font-size="12.0" fill="#E6EAF0">氯化铱粉 6/分钟 · 3 台机器 · 每台 ×1</text>
+<text x="26" y="196" font-size="9.5" fill="#9FB0C0">绿=外购输入 · 黄=目标 · 紫=线内回流 · 虚线=概率产出(期望值) · 每个物料上写的是它自己的买入/产出/消耗/余额</text>
+</svg>
